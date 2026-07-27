@@ -1,24 +1,10 @@
 class StandingFeature:
 
-    def __init__(
-
-        self,
-
-        speed_threshold=5.0
-
-    ):
+    def __init__(self, speed_threshold=5.0):
 
         self.speed_threshold = speed_threshold
 
-    def calculate(
-
-        self,
-
-        previous_record,
-
-        current_record
-
-    ):
+    def calculate(self, previous_record, current_record):
 
         if current_record.speed <= self.speed_threshold:
 
@@ -26,13 +12,7 @@ class StandingFeature:
 
                 return 0.0
 
-            dt = (
-
-                current_record.timestamp -
-
-                previous_record.timestamp
-
-            )
+            dt = current_record.timestamp - previous_record.timestamp
 
             return previous_record.standing_time + dt
 

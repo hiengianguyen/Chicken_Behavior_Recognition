@@ -2,7 +2,6 @@ import torch
 
 from src.models.lstm import ChickenBehaviorLSTM
 
-
 # Khởi tạo model
 model = ChickenBehaviorLSTM()
 
@@ -12,11 +11,7 @@ print(model)
 print("-" * 50)
 
 # Tạo dữ liệu giả
-x = torch.randn(
-    8,      # Batch size
-    90,     # Sequence length
-    18      # Feature
-)
+x = torch.randn(8, 90, 18)  # Batch size  # Sequence length  # Feature
 
 print("Input Shape :", x.shape)
 

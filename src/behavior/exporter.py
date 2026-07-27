@@ -12,21 +12,11 @@ class BehaviorExporter:
 
         output_path = Path(output_path)
 
-        output_path.parent.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        df = pd.DataFrame(
+        df = pd.DataFrame([record.to_dict() for record in self.records])
 
-            [record.to_dict() for record in self.records]
-
-        )
-
-        df.to_csv(
-            output_path,
-            index=False
-        )
+        df.to_csv(output_path, index=False)
 
         print()
 

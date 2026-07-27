@@ -1,6 +1,7 @@
 from typing import Dict
 from .models import Trajectory, TrajectoryRecord
 
+
 class TrajectoryManager:
     """
     Quản lý toàn bộ trajectory của các đối tượng đang được theo dõi.

@@ -11,10 +11,7 @@ MODEL_PATH = "models/best.pt"
 VIDEO_DIR = Path("datasets/videos")
 OUTPUT_DIR = Path("datasets/trajectory")
 
-OUTPUT_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ==========================
 # Danh sách video
@@ -23,7 +20,7 @@ OUTPUT_DIR.mkdir(
 videos = [
     # "normal.mp4",
     # "crowding.mp4",
-    "standing.mp4",
+    # "standing.mp4",
 ]
 
 # ==========================
@@ -36,15 +33,12 @@ for video in videos:
     print(f"Processing: {video}")
 
     pipeline = TrackingPipeline(
-        model_path=MODEL_PATH,
-        video_path=str(VIDEO_DIR / video)
+        model_path=MODEL_PATH, video_path=str(VIDEO_DIR / video)
     )
 
     output_csv = OUTPUT_DIR / f"{Path(video).stem}.csv"
 
-    pipeline.run(
-        str(output_csv)
-    )
+    pipeline.run(str(output_csv))
 
     print(f"Saved -> {output_csv}")
 

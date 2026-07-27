@@ -17,12 +17,9 @@ class FeaturePlotter:
         if feature_name not in self.df.columns:
             raise ValueError(f"{feature_name} not found.")
 
-        plt.figure(figsize=(14,5))
+        plt.figure(figsize=(14, 5))
 
-        plt.plot(
-            self.df["frame"],
-            self.df[feature_name]
-        )
+        plt.plot(self.df["frame"], self.df[feature_name])
 
         plt.title(feature_name)
 
@@ -43,19 +40,11 @@ class FeaturePlotter:
 
         df2 = pd.read_csv(csv2)
 
-        plt.figure(figsize=(14,5))
+        plt.figure(figsize=(14, 5))
 
-        plt.plot(
-            df1["frame"],
-            df1[feature],
-            label="Normal"
-        )
+        plt.plot(df1["frame"], df1[feature], label="Normal")
 
-        plt.plot(
-            df2["frame"],
-            df2[feature],
-            label="Crowding"
-        )
+        plt.plot(df2["frame"], df2[feature], label="Crowding")
 
         plt.xlabel("Frame")
 

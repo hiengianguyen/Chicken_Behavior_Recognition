@@ -5,12 +5,7 @@ import torch.nn as nn
 class ChickenBehaviorLSTM(nn.Module):
 
     def __init__(
-        self,
-        input_size=9,
-        hidden_size=64,
-        num_layers=2,
-        num_classes=4,
-        dropout=0.3
+        self, input_size=9, hidden_size=64, num_layers=2, num_classes=4, dropout=0.3
     ):
 
         super().__init__()
@@ -20,19 +15,14 @@ class ChickenBehaviorLSTM(nn.Module):
             hidden_size=hidden_size,
             num_layers=num_layers,
             batch_first=True,
-            dropout=dropout
+            dropout=dropout,
         )
 
         self.classifier = nn.Sequential(
-
             nn.Linear(hidden_size, 64),
-
             nn.ReLU(),
-
             nn.Dropout(dropout),
-
-            nn.Linear(64, num_classes)
-
+            nn.Linear(64, num_classes),
         )
 
     def forward(self, x):
