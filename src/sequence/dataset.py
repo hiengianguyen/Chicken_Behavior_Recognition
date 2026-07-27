@@ -27,14 +27,8 @@ class ChickenDataset(Dataset):
 
     def __getitem__(self, index):
 
-        x = torch.tensor(
-            self.X[index],
-            dtype=torch.float32
-        )
+        x = torch.tensor(self.X[index], dtype=torch.float32)
 
-        y = torch.tensor(
-            self.y[index],
-            dtype=torch.long
-        )
+        y = torch.tensor(self.y[index], dtype=torch.long)
 
         return x, y

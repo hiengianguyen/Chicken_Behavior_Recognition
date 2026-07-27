@@ -10,11 +10,10 @@ from src.trajectory.manager import TrajectoryManager
 from src.trajectory.models import TrajectoryRecord
 from src.trajectory.exporter import TrajectoryExporter
 
+
 class TrackingPipeline:
 
-    def __init__(self,
-                 model_path,
-                 video_path):
+    def __init__(self, model_path, video_path):
 
         self.detector = ChickenDetector(model_path)
 
@@ -54,11 +53,7 @@ class TrackingPipeline:
 
                 results = self.detector.detect(frame)
 
-                self._process_results(
-                    results,
-                    frame_index,
-                    timestamp
-                )
+                self._process_results(results, frame_index, timestamp)
 
                 frame_index += 1
 
@@ -68,14 +63,9 @@ class TrackingPipeline:
 
         output_path = Path(output_csv)
 
-        output_path.parent.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        exporter = TrajectoryExporter(
-            self.manager
-        )
+        exporter = TrajectoryExporter(self.manager)
 
         exporter.export_csv(output_csv)
 
@@ -89,11 +79,7 @@ class TrackingPipeline:
         print(f"Saved to         : {output_csv}")
         print("=" * 40)
 
-    def _process_results(
-            self,
-            results,
-            frame,
-            timestamp):
+    def _process_results(self, results, frame, timestamp):
 
         result = results[0]
 
@@ -121,25 +107,15 @@ class TrackingPipeline:
             class_id = int(box.cls.item())
 
             record = TrajectoryRecord(
-
                 frame=frame,
-
                 timestamp=timestamp,
-
                 track_id=track_id,
-
                 x=x,
-
                 y=y,
-
                 width=width,
-
                 height=height,
-
                 confidence=confidence,
-
-                class_id=class_id
-
+                class_id=class_id,
             )
 
             self.manager.add_record(record)

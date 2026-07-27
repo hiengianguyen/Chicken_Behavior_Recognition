@@ -2,9 +2,7 @@ from torch.utils.data import DataLoader
 
 from src.sequence.dataset import ChickenDataset
 
-dataset = ChickenDataset(
-    "datasets/sequences"
-)
+dataset = ChickenDataset("datasets/sequences")
 
 print()
 
@@ -20,11 +18,7 @@ print("x shape:", x.shape)
 
 print("label:", y)
 
-loader = DataLoader(
-    dataset,
-    batch_size=8,
-    shuffle=True
-)
+loader = DataLoader(dataset, batch_size=8, shuffle=True)
 
 print()
 

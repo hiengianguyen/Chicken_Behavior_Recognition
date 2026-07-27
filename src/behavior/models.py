@@ -1,5 +1,6 @@
 from dataclasses import dataclass, asdict
 
+
 @dataclass
 class BehaviorRecord:
     frame: int
@@ -15,6 +16,6 @@ class BehaviorRecord:
     # distance_to_center: float = 0.0
     # normalized_distance: float = 0.0
     standing_time: float = 0.0
-    
+
     def to_dict(self):
         return asdict(self)

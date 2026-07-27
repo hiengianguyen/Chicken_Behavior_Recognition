@@ -1,12 +1,9 @@
 import math
 
+
 class SpeedFeature:
 
-    def calculate(
-        self,
-        previous,
-        current
-    ):
+    def calculate(self, previous, current):
 
         dx = current["smooth_x"] - previous["smooth_x"]
 
@@ -17,9 +14,6 @@ class SpeedFeature:
         if dt <= 0:
             return 0.0
 
-        distance = math.sqrt(
-            dx * dx +
-            dy * dy
-        )
+        distance = math.sqrt(dx * dx + dy * dy)
 
         return distance / dt

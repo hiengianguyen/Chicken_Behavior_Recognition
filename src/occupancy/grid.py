@@ -3,11 +3,7 @@ import numpy as np
 
 class OccupancyGrid:
 
-    def __init__(self,
-                 frame_width,
-                 frame_height,
-                 rows=8,
-                 cols=8):
+    def __init__(self, frame_width, frame_height, rows=8, cols=8):
 
         self.frame_width = frame_width
         self.frame_height = frame_height
@@ -29,10 +25,7 @@ class OccupancyGrid:
             numpy array (rows x cols)
         """
 
-        grid = np.zeros(
-            (self.rows, self.cols),
-            dtype=np.uint8
-        )
+        grid = np.zeros((self.rows, self.cols), dtype=np.uint8)
 
         for x, y in centers:
 

@@ -30,15 +30,9 @@ class TrajectoryExporter:
         df = pd.DataFrame(rows)
 
         if not df.empty:
-            df.sort_values(
-                by=["frame", "track_id"],
-                inplace=True
-            )
+            df.sort_values(by=["frame", "track_id"], inplace=True)
 
-            df.reset_index(
-                drop=True,
-                inplace=True
-            )
+            df.reset_index(drop=True, inplace=True)
 
         return df
 
@@ -46,17 +40,11 @@ class TrajectoryExporter:
 
         output_path = Path(output_path)
 
-        output_path.parent.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
         df = self.to_dataframe()
 
-        df.to_csv(
-            output_path,
-            index=False
-        )
+        df.to_csv(output_path, index=False)
 
         print(f"[TrajectoryExporter] Saved -> {output_path}")
 
@@ -64,16 +52,10 @@ class TrajectoryExporter:
 
         output_path = Path(output_path)
 
-        output_path.parent.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
         df = self.to_dataframe()
 
-        df.to_excel(
-            output_path,
-            index=False
-        )
+        df.to_excel(output_path, index=False)
 
         print(f"[TrajectoryExporter] Saved -> {output_path}")

@@ -15,7 +15,7 @@ class ChickenDetector:
             tracker="bytetrack.yaml",
             verbose=False,
             imgsz=640,
-            conf=0.25
+            conf=0.25,
         )
 
         return results

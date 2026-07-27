@@ -67,10 +67,7 @@ class FrameExtractor:
         print(f"\nĐã trích {image_index} ảnh.")
 
 
-def process_folder(
-        input_folder,
-        output_folder,
-        fps_extract=1):
+def process_folder(input_folder, output_folder, fps_extract=1):
 
     extractor = FrameExtractor(fps_extract)
 
@@ -96,5 +93,5 @@ if __name__ == "__main__":
     process_folder(
         input_folder="datasets/videos/1",
         output_folder="datasets/images/train/1",
-        fps_extract=1
+        fps_extract=1,
     )

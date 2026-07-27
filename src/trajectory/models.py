@@ -2,6 +2,7 @@ from dataclasses import dataclass, asdict, field
 from typing import List
 import math
 
+
 @dataclass
 class TrajectoryRecord:
     """
@@ -25,22 +26,19 @@ class TrajectoryRecord:
 
     def to_dict(self):
         return asdict(self)
-    
+
     def first_record(self):
         if not self.records:
             return None
 
         return self.records[0]
-    
+
     def duration(self):
         if len(self.records) < 2:
             return 0.0
 
-        return (
-            self.records[-1].timestamp
-            - self.records[0].timestamp
-        )
-    
+        return self.records[-1].timestamp - self.records[0].timestamp
+
     def total_distance(self):
         if len(self.records) < 2:
             return 0.0
@@ -52,13 +50,10 @@ class TrajectoryRecord:
             prev = self.records[i - 1]
             curr = self.records[i]
 
-            distance += math.dist(
-                (prev.x, prev.y),
-                (curr.x, curr.y)
-            )
+            distance += math.dist((prev.x, prev.y), (curr.x, curr.y))
 
         return distance
-    
+
     def mean_speed(self):
         duration = self.duration()
 
@@ -66,7 +61,7 @@ class TrajectoryRecord:
             return 0.0
 
         return self.total_distance() / duration
-    
+
     def displacement(self):
         if len(self.records) < 2:
             return 0.0
@@ -74,11 +69,8 @@ class TrajectoryRecord:
         first = self.records[0]
         last = self.records[-1]
 
-        return math.dist(
-            (first.x, first.y),
-            (last.x, last.y)
-        )
-    
+        return math.dist((first.x, first.y), (last.x, last.y))
+
     def movement_ratio(self):
         total = self.total_distance()
 
@@ -86,17 +78,15 @@ class TrajectoryRecord:
             return 0.0
 
         return self.displacement() / total
-    
+
     def bounding_box_area_mean(self):
         if not self.records:
             return 0.0
 
-        areas = [
-            r.width * r.height
-            for r in self.records
-        ]
+        areas = [r.width * r.height for r in self.records]
 
         return sum(areas) / len(areas)
+
 
 @dataclass
 class Trajectory:

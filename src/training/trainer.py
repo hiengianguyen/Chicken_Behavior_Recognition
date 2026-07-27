@@ -12,15 +12,9 @@ from src.models.lstm import ChickenBehaviorLSTM
 
 class Trainer:
 
-    def __init__(self,
-                 dataset_dir,
-                 batch_size=8,
-                 epochs=30,
-                 learning_rate=0.001):
+    def __init__(self, dataset_dir, batch_size=8, epochs=30, learning_rate=0.001):
 
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         print(f"\nUsing Device : {self.device}")
 
@@ -31,36 +25,22 @@ class Trainer:
 
         val_size = len(dataset) - train_size
 
-        train_dataset, val_dataset = random_split(
-            dataset,
-            [train_size, val_size]
-        )
+        train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 
         self.train_loader = DataLoader(
-            train_dataset,
-            batch_size=batch_size,
-            shuffle=True
+            train_dataset, batch_size=batch_size, shuffle=True
         )
 
-        self.val_loader = DataLoader(
-            val_dataset,
-            batch_size=batch_size,
-            shuffle=False
-        )
+        self.val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
         # Model
-        self.model = ChickenBehaviorLSTM(
-            num_classes=2
-        ).to(self.device)
+        self.model = ChickenBehaviorLSTM(num_classes=2).to(self.device)
 
         # Loss
         self.criterion = nn.CrossEntropyLoss()
 
         # Optimizer
-        self.optimizer = torch.optim.Adam(
-            self.model.parameters(),
-            lr=learning_rate
-        )
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
 
         self.epochs = epochs
 
@@ -86,21 +66,15 @@ class Trainer:
 
             outputs = self.model(X)
 
-            loss = self.criterion(
-                outputs,
-                y
-            )
-            
+            loss = self.criterion(outputs, y)
+
             loss.backward()
 
             self.optimizer.step()
 
             total_loss += loss.item()
 
-            prediction = torch.argmax(
-                outputs,
-                dim=1
-            )
+            prediction = torch.argmax(outputs, dim=1)
 
             correct += (prediction == y).sum().item()
 
@@ -111,7 +85,7 @@ class Trainer:
         loss = total_loss / len(self.train_loader)
 
         return loss, accuracy
-    
+
     def validate(self):
 
         self.model.eval()
@@ -132,17 +106,11 @@ class Trainer:
 
                 outputs = self.model(X)
 
-                loss = self.criterion(
-                    outputs,
-                    y
-                )
+                loss = self.criterion(outputs, y)
 
                 total_loss += loss.item()
 
-                prediction = torch.argmax(
-                    outputs,
-                    dim=1
-                )
+                prediction = torch.argmax(outputs, dim=1)
 
                 correct += (prediction == y).sum().item()
 
@@ -153,20 +121,12 @@ class Trainer:
         loss = total_loss / len(self.val_loader)
 
         return loss, accuracy
-    
+
     def save_model(self):
 
-        Path("weights").mkdir(
-            exist_ok=True
-        )
+        Path("weights").mkdir(exist_ok=True)
 
-        torch.save(
-
-            self.model.state_dict(),
-
-            "weights/best_model.pt"
-
-        )
+        torch.save(self.model.state_dict(), "weights/best_model.pt")
 
     def train(self):
 
@@ -179,17 +139,11 @@ class Trainer:
             val_loss, val_acc = self.validate()
 
             print(
-
                 f"Epoch {epoch+1}/{self.epochs}"
-
                 f" | Train Loss : {train_loss:.4f}"
-
                 f" | Train Acc : {train_acc:.3f}"
-
                 f" | Val Loss : {val_loss:.4f}"
-
                 f" | Val Acc : {val_acc:.3f}"
-
             )
 
             if val_acc > self.best_accuracy:

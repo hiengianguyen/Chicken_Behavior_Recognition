@@ -6,9 +6,7 @@ import pandas as pd
 
 class SequenceBuilder:
 
-    def __init__(self,
-                 window_size=90,
-                 stride=15):
+    def __init__(self, window_size=90, stride=15):
 
         self.window_size = window_size
         self.stride = stride
@@ -18,7 +16,7 @@ class SequenceBuilder:
         df = pd.read_csv(csv_path)
 
         return df
-    
+
     def _build_sequences(self, df, label):
 
         sequences = []
@@ -30,10 +28,7 @@ class SequenceBuilder:
 
         total = len(features)
 
-        for start in range(
-                0,
-                total - self.window_size + 1,
-                self.stride):
+        for start in range(0, total - self.window_size + 1, self.stride):
 
             end = start + self.window_size
 
@@ -44,7 +39,7 @@ class SequenceBuilder:
             labels.append(label)
 
         return sequences, labels
-    
+
     def build(self, feature_files):
 
         X = []
@@ -55,10 +50,7 @@ class SequenceBuilder:
 
             df = self._load_feature_file(csv_path)
 
-            sequences, labels = self._build_sequences(
-                df,
-                label
-            )
+            sequences, labels = self._build_sequences(df, label)
 
             X.extend(sequences)
 
@@ -69,25 +61,16 @@ class SequenceBuilder:
         y = np.array(y, dtype=np.int64)
 
         return X, y
-    
+
     def save(self, X, y, output_dir):
 
         output_dir = Path(output_dir)
 
-        output_dir.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-        np.save(
-            output_dir / "X.npy",
-            X
-        )
+        np.save(output_dir / "X.npy", X)
 
-        np.save(
-            output_dir / "y.npy",
-            y
-        )
+        np.save(output_dir / "y.npy", y)
 
         print()
 

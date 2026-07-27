@@ -10,10 +10,4 @@ smoother = TrajectorySmoother(alpha=0.3)
 
 result = smoother.smooth_track(track)
 
-print(result[[
-    "frame",
-    "x",
-    "smooth_x",
-    "y",
-    "smooth_y"
-]].head(20))
+print(result[["frame", "x", "smooth_x", "y", "smooth_y"]].head(20))
