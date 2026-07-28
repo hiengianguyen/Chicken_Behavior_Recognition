@@ -33,11 +33,11 @@ class BehaviorManager:
 
         for track in tracks:
 
-            track_id = track["track_id"]
+            track_id = track.track_id
 
-            x = track["x"]
+            x = track.x
 
-            y = track["y"]
+            y = track.y
 
             speed = self.speed.compute(track_id, x, y, timestamp)
 

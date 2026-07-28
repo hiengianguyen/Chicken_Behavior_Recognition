@@ -11,7 +11,7 @@ class Visualizer:
 
     def draw(self, frame, track, record):
 
-        x1, y1, x2, y2 = track["bbox"]
+        x1, y1, x2, y2 = track.bbox
 
         color = self.COLORS.get(record.prediction, self.COLORS["Unknown"])
 
@@ -19,7 +19,7 @@ class Visualizer:
 
         cv2.putText(
             frame,
-            f"ID {track['track_id']}",
+            f"ID {track.track_id}",
             (int(x1), int(y1) - 45),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.6,
@@ -53,7 +53,7 @@ class Visualizer:
 
         for track in tracks:
 
-            track_id = track["track_id"]
+            track_id = track.track_id
 
             if track_id not in record_map:
                 continue
