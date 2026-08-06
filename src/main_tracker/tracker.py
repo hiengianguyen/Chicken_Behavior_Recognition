@@ -7,7 +7,7 @@ class ChickenTracker:
 
     def __init__(
         self,
-        model_path="models/yolo_best.pt",
+        model_path="models/best.pt",
         tracker_cfg="bytetrack.yaml",
         conf=0.4,
     ):
