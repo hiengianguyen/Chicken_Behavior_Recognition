@@ -6,12 +6,24 @@ tracker = ChickenTracker()
 
 cap = cv2.VideoCapture(0)
 
+if not cap.isOpened():
+    raise RuntimeError("Cannot open camera device")
+
+# Keep camera resolution stable to avoid stretched / squeezed frame
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+cv2.namedWindow("Tracker", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Tracker", width, height)
+
 while True:
 
     ret, frame = cap.read()
 
     if not ret:
-
         break
 
     tracks = tracker.update(frame)
@@ -32,12 +44,11 @@ while True:
             2,
         )
 
+    # Keep the display size aligned to the actual camera frame to avoid distortion.
     cv2.imshow("Tracker", frame)
 
     if cv2.waitKey(1) == 27:
-
         break
 
 cap.release()
-
 cv2.destroyAllWindows()
