@@ -12,6 +12,8 @@ class BehaviorRecord:
     acceleration: float = 0.0
     direction: float = 0.0
     standing_time: float = 0.0
+    center_x: float = 0.0
+    center_y: float = 0.0
     prediction: str = ""
     confidence: float = 0.0
 
@@ -27,4 +29,6 @@ class BehaviorRecord:
             self.acceleration,
             self.direction,
             self.standing_time,
+            self.center_x,
+            self.center_y,
         ]

@@ -28,16 +28,29 @@ class ChickenTracker:
             verbose=False,
         )
 
-        tracks = []
-
         result = results[0]
 
-        if result.boxes is None:
+        detection_count = 0
+        track_count = 0
 
+        if result.boxes is not None:
+            detection_count = len(result.boxes)
+
+            if result.boxes.id is not None:
+                track_count = len(result.boxes.id)
+
+        print(
+            f"Detection: {detection_count} | "
+            f"Tracks: {track_count} | "
+            f"IDs: {[int(x) for x in result.boxes.id.tolist()] if result.boxes.id is not None else []}"
+        )
+
+        tracks = []
+
+        if result.boxes is None:
             return tracks
 
         if result.boxes.id is None:
-
             return tracks
 
         for box, track_id in zip(result.boxes, result.boxes.id):
