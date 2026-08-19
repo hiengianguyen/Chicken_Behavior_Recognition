@@ -18,7 +18,7 @@ class BehaviorPredictor:
 
     def __init__(
         self,
-        model_path="weights/behavior_best.pt",
+        model_path="weights/best_model.pt",
         input_size=9,
         num_classes=2,
         window_size=90,

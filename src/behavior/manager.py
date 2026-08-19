@@ -31,6 +31,9 @@ class BehaviorManager:
 
         records = []
 
+        frame_center_x = sum(t.x for t in tracks) / len(tracks) if tracks else 0.0
+        frame_center_y = sum(t.y for t in tracks) / len(tracks) if tracks else 0.0
+
         for track in tracks:
 
             track_id = track.track_id
@@ -45,6 +48,12 @@ class BehaviorManager:
 
             standing_time = self.standing.compute(track_id, speed, timestamp)
 
+            direction = 0.0
+            if hasattr(track, "dx"):
+                direction = track.dx
+            elif hasattr(track, "direction"):
+                direction = track.direction
+
             record = BehaviorRecord(
                 frame=frame,
                 timestamp=timestamp,
@@ -53,7 +62,10 @@ class BehaviorManager:
                 y=y,
                 speed=speed,
                 acceleration=acceleration,
+                direction=direction,
                 standing_time=standing_time,
+                center_x=frame_center_x,
+                center_y=frame_center_y,
             )
 
             records.append(record)
