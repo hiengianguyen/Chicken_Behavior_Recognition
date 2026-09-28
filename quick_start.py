@@ -54,11 +54,7 @@ def run_inference():
     print("  python inference.py \\")
     print("    --source 0 \\")
     print("    --detector-model models/best.pt \\")
-    print("    --behavior-model weights/best_model.pt \\")
-    print("    --log-dir logs")
-
-    print("\nView Logs:")
-    print("  tail -f logs/chicken_status.jsonl")
+    print("    --behavior-model weights/best_model.pt")
 
 
 def train_behavior_model():

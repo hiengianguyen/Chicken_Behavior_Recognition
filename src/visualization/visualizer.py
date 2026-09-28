@@ -29,16 +29,6 @@ class Visualizer:
 
         cv2.putText(
             frame,
-            record.prediction,
-            (int(x1), int(y1) - 25),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            color,
-            2,
-        )
-
-        cv2.putText(
-            frame,
             f"{record.confidence*100:.1f}%",
             (int(x1), int(y1) - 5),
             cv2.FONT_HERSHEY_SIMPLEX,
@@ -61,18 +51,6 @@ class Visualizer:
             self.draw(frame, track, record_map[track_id])
 
     def draw_statistics(self, frame, records, fps):
-
-        normal = 0
-        standing = 0
-
-        for r in records:
-
-            if r.prediction == "Normal":
-                normal += 1
-
-            elif r.prediction == "Standing":
-                standing += 1
-
         cv2.putText(
             frame,
             f"FPS : {fps:.1f}",
@@ -80,25 +58,5 @@ class Visualizer:
             cv2.FONT_HERSHEY_SIMPLEX,
             0.7,
             (255, 255, 255),
-            2,
-        )
-
-        cv2.putText(
-            frame,
-            f"Normal : {normal}",
-            (20, 60),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            (0, 255, 0),
-            2,
-        )
-
-        cv2.putText(
-            frame,
-            f"Standing : {standing}",
-            (20, 90),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            (0, 0, 255),
             2,
         )

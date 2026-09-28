@@ -82,6 +82,22 @@ class BehaviorPredictor:
 
         return result
 
+    def reset_track(self, track_id):
+        """Discard behavior history after a track disappears from the frame."""
+        self.buffer.clear(track_id)
+        self.prediction_history.pop(track_id, None)
+        self.confidence_history.pop(track_id, None)
+        self.frame_counter.pop(track_id, None)
+        self.last_prediction.pop(track_id, None)
+
+    def sync_tracks(self, active_track_ids):
+        """Keep stale predictions from being reused when an ID reappears."""
+        active_ids = {int(track_id) for track_id in active_track_ids}
+        known_ids = set(self.frame_counter) | set(self.last_prediction)
+
+        for track_id in known_ids - active_ids:
+            self.reset_track(track_id)
+
     def smooth_prediction(self, track_id, prediction):
 
         history = self.prediction_history[track_id]

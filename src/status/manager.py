@@ -117,8 +117,7 @@ class StatusManager:
     # --------------------------------
 
     def get_active_states(self):
-
-        return list(self.states.values())
+        return [state for state in self.states.values() if state["status"] == "active"]
 
     # --------------------------------
     # Current snapshot
@@ -128,10 +127,8 @@ class StatusManager:
 
         return {
             "timestamp": self._now(),
-            "total_tracks": len(self.states),
-            "active": sum(
-                1 for state in self.states.values() if state["status"] == "active"
-            ),
+            "total_tracks": len(self.get_active_states()),
+            "active": len(self.get_active_states()),
             "temporarily_missing": sum(
                 1
                 for state in self.states.values()

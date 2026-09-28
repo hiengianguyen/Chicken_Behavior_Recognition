@@ -3,3 +3,6 @@ opencv-python
 numpy
 pandas
 tqdm
+flask
+flask-cors
+pyserial
