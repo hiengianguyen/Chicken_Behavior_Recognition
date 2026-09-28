@@ -6,7 +6,6 @@ from src.predictor.predictor import BehaviorPredictor
 from src.visualization.visualizer import Visualizer
 
 from src.status.manager import StatusManager
-from src.status.logger import StatusLogger
 
 
 class ChickenPipeline:
@@ -43,8 +42,6 @@ class ChickenPipeline:
 
         self.status_manager = StatusManager(max_missed_frames=15)
 
-        self.status_logger = StatusLogger(log_path="logs/chicken_status.jsonl")
-
         # =====================================
         # VISUALIZATION
         # =====================================
@@ -68,6 +65,7 @@ class ChickenPipeline:
         # -------------------------------------
 
         tracks = self.track(frame)
+        self.predictor.sync_tracks(track.track_id for track in tracks)
 
         # -------------------------------------
         # 3. Extract behavior features
@@ -91,25 +89,7 @@ class ChickenPipeline:
         statuses = self.status_manager.update(tracks, records_dict)
 
         # -------------------------------------
-        # 6. Create snapshot
-        # -------------------------------------
-
-        snapshot = self.status_manager.snapshot()
-
-        # -------------------------------------
-        # 7. Save log
-        # -------------------------------------
-
-        self.status_logger.log_snapshot(snapshot)
-
-        # -------------------------------------
-        # 8. Debug terminal
-        # -------------------------------------
-
-        self.log_status(statuses)
-
-        # -------------------------------------
-        # 9. Render
+        # 6. Render
         # -------------------------------------
 
         self.render(frame, tracks, records)
@@ -152,22 +132,6 @@ class ChickenPipeline:
                 # Still add record even if no prediction yet (buffer not ready)
                 predictions.append(record)
         return predictions
-
-    # =========================================
-    # STATUS LOG
-    # =========================================
-
-    def log_status(self, statuses):
-
-        for state in statuses:
-
-            print(
-                f"ID={state['track_id']} | "
-                f"Status={state['status']} | "
-                f"Behavior={state['behavior']} | "
-                f"Conf={state['confidence']:.2f} | "
-                f"Miss={state['missed_frames']}"
-            )
 
     # =========================================
     # VISUALIZATION

@@ -25,7 +25,6 @@ class ChickenInferencePipeline:
         detector_model="models/best.pt",
         behavior_model="weights/best_model.pt",
         output_video=None,
-        log_dir="logs",
     ):
 
         self.pipeline = ChickenPipeline(
@@ -33,8 +32,6 @@ class ChickenInferencePipeline:
             behavior_model=behavior_model,
         )
         self.output_video = output_video
-        self.log_dir = Path(log_dir)
-        self.log_dir.mkdir(parents=True, exist_ok=True)
 
         self.video_writer = None
         self.frame_count = 0
@@ -229,13 +226,6 @@ def main():
         default=None,
         help="Output video path (optional)",
     )
-    parser.add_argument(
-        "--log-dir",
-        type=str,
-        default="logs",
-        help="Directory to save logs (default: logs)",
-    )
-
     args = parser.parse_args()
 
     # Create inference pipeline
@@ -243,7 +233,6 @@ def main():
         detector_model=args.detector_model,
         behavior_model=args.behavior_model,
         output_video=args.output,
-        log_dir=args.log_dir,
     )
 
     # Determine source: webcam or video file
