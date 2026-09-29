@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 datasets/
+/Database
 /models/
 /weights/
 *.md
