@@ -15,6 +15,7 @@ import serial
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
 
+from src.firestore_api import firestore_api
 from src.pipeline.pipeline import ChickenPipeline
 
 
@@ -212,6 +213,7 @@ def create_app():
 
     app = Flask(__name__)
     CORS(app)
+    app.register_blueprint(firestore_api)
     arduino = ArduinoReader(port="COM3", baudrate=9600)
     app.config["inference_service"] = service
 
