@@ -154,6 +154,7 @@ class ArduinoReader:
         self.baudrate = baudrate
         self.condition = threading.Condition()
         self.latest_data = None
+        self.sample_id = 0
         self.last_error = None
         self.stop_event = threading.Event()
         self.serial = None
@@ -166,6 +167,11 @@ class ArduinoReader:
 
     def latest(self):
         with self.condition:
+            if (
+                self.latest_data is not None
+                and time.time() - self.latest_data["timestamp"] > 3
+            ):
+                return None, self.last_error or "No fresh sensor data received"
             return self.latest_data, self.last_error
 
     def _run(self):
@@ -194,6 +200,8 @@ class ArduinoReader:
                     continue
 
                 with self.condition:
+                    self.sample_id += 1
+                    data["sample_id"] = self.sample_id
                     self.latest_data = data
                     self.last_error = None
                     self.condition.notify_all()
@@ -214,7 +222,7 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
     app.register_blueprint(firestore_api)
-    arduino = ArduinoReader(port="COM3", baudrate=9600)
+    arduino = ArduinoReader(port="COM4", baudrate=9600)
     app.config["inference_service"] = service
 
     @app.get("/api/sensor")
@@ -222,7 +230,24 @@ def create_app():
         data, error = arduino.latest()
         if data is None:
             return jsonify({"ready": False, "data": None, "error": error}), 202
-        return jsonify({"ready": True, "data": data})
+
+        try:
+            after = int(request.args.get("after", "-1"))
+        except ValueError:
+            return jsonify({"error": "after must be an integer"}), 400
+
+        if after >= data["sample_id"]:
+            return jsonify({
+                "ready": True,
+                "fresh": False,
+                "sample_id": data["sample_id"],
+            })
+        return jsonify({
+            "ready": True,
+            "fresh": True,
+            "sample_id": data["sample_id"],
+            "data": data,
+        })
 
     @app.get("/api/video")
     def video():
