@@ -5,4 +5,5 @@ pandas
 tqdm
 flask
 flask-cors
+firebase-admin
 pyserial
