@@ -11,7 +11,7 @@ from flask import Blueprint, current_app, jsonify, request
 
 
 firestore_api = Blueprint("firestore_api", __name__)
-COLLECTIONS = {"notifications", "devices", "automationRules", "power", "historyPower"}
+COLLECTIONS = {"notifications", "devices", "automationRules", "power", "historyPower", "settings"}
 _client = None
 _client_lock = threading.Lock()
 
