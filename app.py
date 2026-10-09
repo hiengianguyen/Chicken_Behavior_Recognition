@@ -7,6 +7,8 @@ status snapshot for the UI endpoints to consume.
 
 import argparse
 import json
+import logging
+import os
 import threading
 import time
 
@@ -149,15 +151,17 @@ class InferenceService:
 class ArduinoReader:
     """Read newline-delimited JSON from Arduino and keep the latest valid sample."""
 
-    def __init__(self, port="COM3", baudrate=9600):
+    def __init__(self, port="COM4", baudrate=9600, logger=None):
         self.port = port
         self.baudrate = baudrate
+        self.logger = logger or logging.getLogger(__name__)
         self.condition = threading.Condition()
         self.latest_data = None
         self.sample_id = 0
         self.last_error = None
         self.stop_event = threading.Event()
         self.serial = None
+        self.write_lock = threading.Lock()
         self.worker = threading.Thread(
             target=self._run,
             name="arduino-reader",
@@ -174,43 +178,129 @@ class ArduinoReader:
                 return None, self.last_error or "No fresh sensor data received"
             return self.latest_data, self.last_error
 
+    def status(self):
+        with self.write_lock:
+            connected = bool(self.serial and self.serial.is_open)
+        with self.condition:
+            return {
+                "port": self.port,
+                "baudrate": self.baudrate,
+                "connected": connected,
+                "has_sensor_data": self.latest_data is not None,
+                "sample_id": self.sample_id,
+                "last_error": self.last_error,
+            }
+
     def _run(self):
-        try:
-            self.serial = serial.Serial(self.port, self.baudrate, timeout=1)
-            while not self.stop_event.is_set():
-                raw_line = self.serial.readline()
-                if not raw_line:
-                    continue
-
-                try:
-                    payload = json.loads(raw_line.decode("utf-8").strip())
-                    data = {
-                        "temperature": float(payload["temperature"]),
-                        "humidity": float(payload["humidity"]),
-                        "gas": float(payload["gas"]),
-                        "timestamp": time.time(),
-                    }
-                except (
-                    UnicodeDecodeError,
-                    json.JSONDecodeError,
-                    KeyError,
-                    TypeError,
-                    ValueError,
-                ):
-                    continue
-
+        while not self.stop_event.is_set():
+            connection = None
+            try:
+                connection = serial.Serial(self.port, self.baudrate, timeout=1)
+                with self.write_lock:
+                    self.serial = connection
                 with self.condition:
-                    self.sample_id += 1
-                    data["sample_id"] = self.sample_id
-                    self.latest_data = data
                     self.last_error = None
                     self.condition.notify_all()
-        except serial.SerialException as exc:
-            with self.condition:
-                self.last_error = str(exc)
-        finally:
-            if self.serial is not None and self.serial.is_open:
-                self.serial.close()
+                self.logger.info(
+                    "Connected to Arduino on %s at %s baud",
+                    self.port,
+                    self.baudrate,
+                )
+
+                while not self.stop_event.is_set():
+                    raw_line = connection.readline()
+                    if not raw_line:
+                        continue
+
+                    try:
+                        line = raw_line.decode("utf-8").strip()
+                    except UnicodeDecodeError:
+                        self.logger.warning("Received non-UTF-8 data from Arduino")
+                        continue
+
+                    if not line:
+                        continue
+
+                    try:
+                        payload = json.loads(line)
+                    except json.JSONDecodeError:
+                        self.logger.info("Arduino: %s", line)
+                        continue
+
+                    try:
+                        data = {
+                            "temperature": float(payload["temperature"]),
+                            "humidity": float(payload["humidity"]),
+                            "gas": float(payload["gas"]),
+                            "timestamp": time.time(),
+                        }
+                    except (
+                        KeyError,
+                        TypeError,
+                        ValueError,
+                    ):
+                        continue
+
+                    with self.condition:
+                        self.sample_id += 1
+                        data["sample_id"] = self.sample_id
+                        self.latest_data = data
+                        self.last_error = None
+                        self.condition.notify_all()
+            except serial.SerialException as exc:
+                with self.condition:
+                    self.last_error = str(exc)
+                    self.condition.notify_all()
+                self.logger.exception("Arduino serial connection failed on %s", self.port)
+            finally:
+                with self.write_lock:
+                    if connection is not None and connection.is_open:
+                        connection.close()
+                    if self.serial is connection:
+                        self.serial = None
+                with self.condition:
+                    self.condition.notify_all()
+
+            if not self.stop_event.is_set():
+                self.logger.warning("Retrying Arduino connection on %s in 2 seconds", self.port)
+                self.stop_event.wait(2)
+
+    def set_device_state(self, device_id, enabled, power=100):
+        device_names = {
+            "FAN_01": "fan",
+            "WINDOW_01": "window",
+            "HEATER_01": "heater",
+            "MIST_01": "mist",
+            "LIGHT_01": "light",
+            "FEEDER_01": "feed",
+        }
+        if not isinstance(device_id, str):
+            raise ValueError("deviceId must be a string")
+        device = device_names.get(device_id)
+        if device is None:
+            raise ValueError(f"Arduino does not support device: {device_id}")
+        if not isinstance(enabled, bool):
+            raise ValueError("enabled must be a boolean")
+        if isinstance(power, bool) or not isinstance(power, (int, float)):
+            raise ValueError("power must be a number between 0 and 100")
+        if not 0 <= power <= 100:
+            raise ValueError("power must be a number between 0 and 100")
+
+        with self.write_lock:
+            if self.serial is None or not self.serial.is_open:
+                self.logger.error("Cannot send %s command: Arduino is disconnected", device)
+                raise RuntimeError("Arduino is not connected")
+            command = {
+                "device": device,
+                "active": enabled,
+                "power": int(power),
+            }
+            try:
+                self.serial.write((json.dumps(command) + "\n").encode("utf-8"))
+            except serial.SerialException as exc:
+                raise RuntimeError(f"Could not send command to Arduino: {exc}") from exc
+            self.logger.info("Sent command to Arduino: %s", json.dumps(command))
+        return command
 
 
 def create_app():
@@ -220,9 +310,15 @@ def create_app():
     )
 
     app = Flask(__name__)
+    app.logger.setLevel(logging.INFO)
     CORS(app)
     app.register_blueprint(firestore_api)
-    arduino = ArduinoReader(port="COM4", baudrate=9600)
+    arduino = ArduinoReader(
+        port=os.getenv("ARDUINO_PORT", "COM4"),
+        baudrate=9600,
+        logger=app.logger,
+    )
+    app.config["arduino_reader"] = arduino
     app.config["inference_service"] = service
 
     @app.get("/api/sensor")
@@ -269,6 +365,11 @@ def create_app():
     @app.get("/api/status")
     def api_status():
         return jsonify(service.status())
+
+    @app.get("/api/arduino/status")
+    def arduino_status():
+        state = arduino.status()
+        return jsonify(state), (200 if state["connected"] else 503)
 
     @app.post("/api/start")
     def start():

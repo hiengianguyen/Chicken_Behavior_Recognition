@@ -81,9 +81,30 @@ def upsert_record(collection_name, document_id):
     if not _valid_document_id(document_id) or payload is None:
         return jsonify({"error": "A valid document ID and JSON object are required."}), 400
 
+    command = None
+    if collection_name == "devices" and "enabled" in payload:
+        device_id = payload.get("deviceId", document_id)
+        arduino = current_app.config.get("arduino_reader")
+        if arduino is None:
+            return jsonify({"error": "Arduino control is not configured."}), 503
+        try:
+            command = arduino.set_device_state(
+                device_id,
+                payload["enabled"],
+                payload.get("power", 100),
+            )
+
+        except ValueError as error:
+            return jsonify({"error": str(error)}), 400
+        except RuntimeError as error:
+            return jsonify({"error": str(error)}), 503
+
     try:
         _get_client().collection(collection_name).document(document_id).set(payload)
-        return jsonify({"id": document_id, "saved": True})
+        response = {"id": document_id, "saved": True}
+        if command is not None:
+            response["command_sent"] = True
+        return jsonify(response)
     except Exception as error:
         return _error_response(error)
 
