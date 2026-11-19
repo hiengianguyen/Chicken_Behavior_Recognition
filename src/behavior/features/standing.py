@@ -1,7 +1,8 @@
 class StandingFeature:
 
-    def __init__(self, speed_threshold=5.0):
+    SPEED_THRESHOLD = 5.0
 
+    def __init__(self, speed_threshold=SPEED_THRESHOLD):
         self.speed_threshold = speed_threshold
         self.track_state = {}
 

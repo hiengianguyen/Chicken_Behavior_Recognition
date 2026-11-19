@@ -3,6 +3,7 @@ import torch
 
 from src.models.lstm import ChickenBehaviorLSTM
 from src.predictor.buffer import SequenceBuffer
+from src.behavior.features.standing import StandingFeature
 
 from collections import defaultdict, deque
 from collections import Counter
@@ -47,6 +48,7 @@ class BehaviorPredictor:
         self.frame_counter = defaultdict(int)
 
         self.last_prediction = {}
+        self.reanalysis_pending = set()
 
     def update(self, record):
         """
@@ -57,9 +59,24 @@ class BehaviorPredictor:
 
         self.frame_counter[record.track_id] += 1
 
+        if record.speed > StandingFeature.SPEED_THRESHOLD:
+            self.buffer.clear(record.track_id)
+            self.prediction_history.pop(record.track_id, None)
+            self.confidence_history.pop(record.track_id, None)
+            self.reanalysis_pending.add(record.track_id)
+            result = {
+                "label": self.LABELS[0],
+                "class": 0,
+                "confidence": 0.0,
+            }
+            self.last_prediction[record.track_id] = result
+            return result
+
         self.buffer.update(record.track_id, record.to_feature())
 
         if not self.buffer.ready(record.track_id):
+            if record.track_id in self.reanalysis_pending:
+                return self.last_prediction.get(record.track_id)
             return None
 
         if self.frame_counter[record.track_id] % self.predict_interval != 0:
@@ -79,6 +96,7 @@ class BehaviorPredictor:
         )
 
         self.last_prediction[record.track_id] = result
+        self.reanalysis_pending.discard(record.track_id)
 
         return result
 
@@ -89,6 +107,7 @@ class BehaviorPredictor:
         self.confidence_history.pop(track_id, None)
         self.frame_counter.pop(track_id, None)
         self.last_prediction.pop(track_id, None)
+        self.reanalysis_pending.discard(track_id)
 
     def sync_tracks(self, active_track_ids):
         """Keep stale predictions from being reused when an ID reappears."""

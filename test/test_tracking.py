@@ -6,7 +6,7 @@ from src.tracker.pipeline import TrackingPipeline
 # Đường dẫn
 # ==========================
 
-MODEL_PATH = "models/best.pt"
+MODEL_PATH = "models/best_obj.pt"
 
 VIDEO_DIR = Path("datasets/videos")
 OUTPUT_DIR = Path("datasets/trajectory")

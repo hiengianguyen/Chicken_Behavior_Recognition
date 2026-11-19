@@ -27,7 +27,7 @@ def test_pipeline_components():
         from pathlib import Path
 
         print("1. Checking model files...")
-        detector_model = "models/best.pt"
+        detector_model = "models/best_obj.pt"
         behavior_model = "weights/best_model.pt"  # Use available model
 
         if not Path(detector_model).exists():
@@ -131,7 +131,7 @@ def test_inference_modes():
         print("      python inference.py --source 0")
         print("   With custom models:")
         print("      python inference.py --source 0 \\")
-        print("         --detector-model models/best.pt \\")
+        print("         --detector-model models/best_obj.pt \\")
         print("         --behavior-model weights/best_model.pt\n")
 
         print("=" * 60)

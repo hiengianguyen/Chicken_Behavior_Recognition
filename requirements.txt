@@ -1,6 +1,6 @@
 ultralytics
-opencv-python
-numpy
+opencv-python<4.12
+numpy<2
 pandas
 tqdm
 flask

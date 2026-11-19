@@ -12,7 +12,7 @@ class ChickenPipeline:
 
     def __init__(
         self,
-        detector_model="models/yolo_best.pt",
+        detector_model="models/yolo_best_obj.pt",
         behavior_model="models/best_model.pt",
     ):
 

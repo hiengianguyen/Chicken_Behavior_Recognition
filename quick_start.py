@@ -53,7 +53,7 @@ def run_inference():
     print("\nWith Custom Models:")
     print("  python inference.py \\")
     print("    --source 0 \\")
-    print("    --detector-model models/best.pt \\")
+    print("    --detector-model models/best_obj.pt \\")
     print("    --behavior-model weights/best_model.pt")
 
 
@@ -161,7 +161,7 @@ def show_troubleshooting():
         ),
         ("", ""),
         ("Slow FPS", "Too many heavy operations"),
-        ("  Solution:", "Use smaller YOLO model (e.g., best_1.pt instead of best.pt)"),
+        ("  Solution:", "Use smaller YOLO model (e.g., best_1.pt instead of best_obj.pt)"),
         ("", ""),
         ("'q' key not working in video", "Window may lose focus"),
         ("  Solution:", "Click on video window before pressing 'q'"),

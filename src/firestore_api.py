@@ -91,7 +91,7 @@ def upsert_record(collection_name, document_id):
             command = arduino.set_device_state(
                 device_id,
                 payload["enabled"],
-                payload.get("power", 100),
+                payload.get("power", 100 if payload["enabled"] else 0),
             )
 
         except ValueError as error:
