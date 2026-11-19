@@ -22,7 +22,7 @@ class ChickenInferencePipeline:
 
     def __init__(
         self,
-        detector_model="models/best.pt",
+        detector_model="models/best_obj.pt",
         behavior_model="weights/best_model.pt",
         output_video=None,
     ):
@@ -211,8 +211,8 @@ def main():
     parser.add_argument(
         "--detector-model",
         type=str,
-        default="models/best.pt",
-        help="Path to YOLO detector model (default: models/best.pt)",
+        default="models/best_obj.pt",
+        help="Path to YOLO detector model (default: models/best_obj.pt)",
     )
     parser.add_argument(
         "--behavior-model",

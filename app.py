@@ -11,6 +11,7 @@ import logging
 import os
 import threading
 import time
+from pathlib import Path
 
 import cv2
 import serial
@@ -151,7 +152,7 @@ class InferenceService:
 class ArduinoReader:
     """Read newline-delimited JSON from Arduino and keep the latest valid sample."""
 
-    def __init__(self, port="COM4", baudrate=9600, logger=None):
+    def __init__(self, port="COM8", baudrate=9600, logger=None):
         self.port = port
         self.baudrate = baudrate
         self.logger = logger or logging.getLogger(__name__)
@@ -228,21 +229,27 @@ class ArduinoReader:
                         continue
 
                     try:
-                        data = {
-                            "temperature": float(payload["temperature"]),
-                            "humidity": float(payload["humidity"]),
-                            "gas": float(payload["gas"]),
-                            "timestamp": time.time(),
-                        }
-                    except (
-                        KeyError,
-                        TypeError,
-                        ValueError,
-                    ):
+                        if not isinstance(payload, dict):
+                            continue
+                        fire_detected = payload.get("fire_detected", False)
+                        if not isinstance(fire_detected, bool):
+                            continue
+                        data = {"fire_detected": fire_detected}
+                        fire_alarm_silenced = payload.get("fire_alarm_silenced", False)
+                        if isinstance(fire_alarm_silenced, bool):
+                            data["fire_alarm_silenced"] = fire_alarm_silenced
+                        fire_alarm_active = payload.get("fire_alarm_active", False)
+                        if isinstance(fire_alarm_active, bool):
+                            data["fire_alarm_active"] = fire_alarm_active
+                        for key in ("temperature", "humidity", "gas"):
+                            if key in payload:
+                                data[key] = float(payload[key])
+                    except (TypeError, ValueError):
                         continue
 
                     with self.condition:
                         self.sample_id += 1
+                        data["timestamp"] = time.time()
                         data["sample_id"] = self.sample_id
                         self.latest_data = data
                         self.last_error = None
@@ -302,11 +309,25 @@ class ArduinoReader:
             self.logger.info("Sent command to Arduino: %s", json.dumps(command))
         return command
 
+    def silence_fire_alarm(self):
+        with self.write_lock:
+            if self.serial is None or not self.serial.is_open:
+                self.logger.error("Cannot silence fire alarm: Arduino is disconnected")
+                raise RuntimeError("Arduino is not connected")
+            command = {"device": "fire_alarm", "active": False, "power": 0}
+            try:
+                self.serial.write((json.dumps(command) + "\n").encode("utf-8"))
+            except serial.SerialException as exc:
+                raise RuntimeError(f"Could not silence fire alarm: {exc}") from exc
+            self.logger.info("Sent fire alarm silence command to Arduino")
+        return command
+
 
 def create_app():
+    project_dir = Path(__file__).resolve().parent
     service = InferenceService(
-        detector_model="models/best.pt",
-        behavior_model="weights/best_model.pt",
+        detector_model=str(project_dir / "models" / "best_obj.pt"),
+        behavior_model=str(project_dir / "weights" / "best_model.pt"),
     )
 
     app = Flask(__name__)
@@ -314,7 +335,7 @@ def create_app():
     CORS(app)
     app.register_blueprint(firestore_api)
     arduino = ArduinoReader(
-        port=os.getenv("ARDUINO_PORT", "COM4"),
+        port=os.getenv("ARDUINO_PORT", "COM8"),
         baudrate=9600,
         logger=app.logger,
     )
@@ -353,6 +374,11 @@ def create_app():
         return Response(
             service.frame_stream(),
             mimetype="multipart/x-mixed-replace; boundary=frame",
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "X-Accel-Buffering": "no",
+            },
         )
 
     @app.get("/api/latest-data")
@@ -370,6 +396,14 @@ def create_app():
     def arduino_status():
         state = arduino.status()
         return jsonify(state), (200 if state["connected"] else 503)
+
+    @app.post("/api/fire-alarm/silence")
+    def silence_fire_alarm():
+        try:
+            command = arduino.silence_fire_alarm()
+        except RuntimeError as error:
+            return jsonify({"error": str(error)}), 503
+        return jsonify({"sent": True, "command": command})
 
     @app.post("/api/start")
     def start():

@@ -27,15 +27,16 @@ class Visualizer:
             2,
         )
 
-        cv2.putText(
-            frame,
-            f"{record.confidence*100:.1f}%",
-            (int(x1), int(y1) - 5),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
-            color,
-            2,
-        )
+        if record.confidence > 0:
+            cv2.putText(
+                frame,
+                f"{record.confidence*100:.1f}%",
+                (int(x1), int(y1) - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                color,
+                2,
+            )
 
     def draw_many(self, frame, tracks, records):
 

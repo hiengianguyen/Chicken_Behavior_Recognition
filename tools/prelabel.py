@@ -7,7 +7,7 @@ from ultralytics import YOLO
 # CONFIG
 # =========================================================
 
-MODEL_PATH = Path("models/best.pt")
+MODEL_PATH = Path("models/best_obj.pt")
 
 IMAGE_DIR = Path("datasets/prelabel/images")
 
